@@ -1,4 +1,7 @@
+
 from pathlib import Path
+
+
 class FileManager:
     """Handles basic file and folder operations for the application."""
 
@@ -19,3 +22,9 @@ class FileManager:
         """Read and return the text content of a file."""
         file_path = self.folder_path / file_name
         return file_path.read_text(encoding="utf-8")
+
+    def file_exists(self, file_name):
+        """Check whether a specific file exists in the folder."""
+        file_path = self.folder_path / file_name
+        return file_path.is_file()
+
