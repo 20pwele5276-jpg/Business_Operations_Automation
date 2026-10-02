@@ -28,3 +28,7 @@ class FileManager:
         file_path = self.folder_path / file_name
         return file_path.is_file()
 
+    def list_files(self):
+        """Return a list of files in the folder."""
+        return [file for file in self.folder_path.iterdir() if file.is_file()]
+
