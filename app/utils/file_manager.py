@@ -1,6 +1,5 @@
-
 from pathlib import Path
-
+import shutil
 
 class FileManager:
     """Handles basic file and folder operations for the application."""
@@ -31,4 +30,12 @@ class FileManager:
     def list_files(self):
         """Return a list of files in the folder."""
         return [file for file in self.folder_path.iterdir() if file.is_file()]
+
+    def move_file(self, file_name, destination_folder):
+        """Move a file from the current folder to another folder."""
+        source_path = self.folder_path / file_name
+        destination_path = Path(destination_folder)
+        destination_path.mkdir(parents=True, exist_ok=True)
+
+        shutil.move(str(source_path), str(destination_path / file_name))
 
