@@ -1,6 +1,7 @@
 from pathlib import Path
 import shutil
 
+
 class FileManager:
     """Handles basic file and folder operations for the application."""
 
@@ -38,4 +39,12 @@ class FileManager:
         destination_path.mkdir(parents=True, exist_ok=True)
 
         shutil.move(str(source_path), str(destination_path / file_name))
+
+    def copy_file(self, file_name, destination_folder):
+        """Copy a file to another folder while keeping the original."""
+        source_path = self.folder_path / file_name
+        destination_path = Path(destination_folder)
+        destination_path.mkdir(parents=True, exist_ok=True)
+
+        shutil.copy2(str(source_path), str(destination_path / file_name))
 
