@@ -1,7 +1,6 @@
 from pathlib import Path
 import shutil
 
-
 class FileManager:
     """Handles basic file and folder operations for the application."""
 
@@ -47,4 +46,11 @@ class FileManager:
         destination_path.mkdir(parents=True, exist_ok=True)
 
         shutil.copy2(str(source_path), str(destination_path / file_name))
+
+    def delete_file(self, file_name):
+        """Delete a file from the current folder."""
+        file_path = self.folder_path / file_name
+
+        if file_path.is_file():
+            file_path.unlink()
 
