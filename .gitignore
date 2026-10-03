@@ -24,3 +24,5 @@ htmlcov/
 Thumbs.db
 data/business.db
 reports/
+data/input/*
+data/processed/*
