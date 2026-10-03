@@ -26,3 +26,6 @@ data/business.db
 reports/
 data/input/*
 data/processed/*
+
+data/archive/*
+!data/archive/.gitkeep
