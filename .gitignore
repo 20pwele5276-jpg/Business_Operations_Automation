@@ -1,3 +1,4 @@
+```gitignore
 # Virtual environment
 venv/
 
@@ -22,10 +23,23 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local database
 data/business.db
+
+# Generated reports
 reports/
+
+# Input files
 data/input/*
+
+# Processed files
 data/processed/*
 
+# Archived files
 data/archive/*
 !data/archive/.gitkeep
+
+# Database backups
+data/backup/*.db
+```
