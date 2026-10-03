@@ -1,3 +1,4 @@
+
 from app.database.database_manager import DatabaseManager
 from app.exceptions.app_exceptions import DatabaseError
 from app.utils.logger import AppLogger
@@ -11,26 +12,31 @@ class CustomerRepository:
         self.logger = AppLogger()
 
     def save_customers(self, customers):
-        """Save a list of customer records to the database."""
+        """Save customers while avoiding duplicate email addresses."""
         saved_count = 0
 
         for customer in customers:
             try:
-                customer_id = customer.get("customer_id")
-
-                if customer_id is None:
-                    customer_id = self._get_next_customer_id()
-
-                name = customer.get("name", "").strip()
-                email = customer.get("email", "").strip()
+                name = str(customer.get("name", "")).strip()
+                email = str(customer.get("email", "")).strip()
 
                 if not name or not email:
                     raise DatabaseError(
                         "Customer name and email are required."
                     )
 
+                existing_customer = self._find_by_email(email)
+
+                if existing_customer:
+                    self.logger.info(
+                        f"Customer already exists: {email}"
+                    )
+                    continue
+
+                customer_id = self._get_next_customer_id()
+
                 self.database_manager.add_customer(
-                    int(customer_id),
+                    customer_id,
                     name,
                     email,
                 )
@@ -49,10 +55,20 @@ class CustomerRepository:
                 ) from error
 
         self.logger.info(
-            f"Saved {saved_count} customer(s) to the database."
+            f"Saved {saved_count} new customer(s) to the database."
         )
 
         return saved_count
+
+    def _find_by_email(self, email):
+        """Find an existing customer using their email."""
+        customers = self.database_manager.get_customers()
+
+        for customer in customers:
+            if customer[2].lower() == email.lower():
+                return customer
+
+        return None
 
     def _get_next_customer_id(self):
         """Generate the next available customer ID."""
