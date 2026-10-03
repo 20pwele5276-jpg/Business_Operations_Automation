@@ -17,6 +17,14 @@ from app.utils.logger import AppLogger
 class AutomationService:
     """Coordinates the automated business file processing workflow."""
 
+    REQUIRED_FIELDS = {
+        "customers": ["customer_id", "name", "email"],
+        "products": ["product_id", "name", "price"],
+        "orders": ["customer_id", "product_id", "quantity"],
+        "invoices": ["order_id", "total_amount"],
+        "payments": ["invoice_id", "amount"],
+    }
+
     def __init__(
         self,
         input_folder="data/input",
@@ -45,7 +53,9 @@ class AutomationService:
         self.processed_folder.mkdir(parents=True, exist_ok=True)
         self.archive_folder.mkdir(parents=True, exist_ok=True)
 
-    def process_pending_files(self, required_fields):
+        self.database_manager.create_tables()
+
+    def process_pending_files(self, required_fields=None):
         """Process supported files currently waiting in the input folder."""
         files = self.watcher.get_new_files()
         results = []
@@ -55,76 +65,24 @@ class AutomationService:
             archive_path = self.archive_folder / file_path.name
 
             try:
+                file_required_fields = required_fields
+
+                if file_required_fields is None:
+                    file_required_fields = self._get_required_fields(
+                        file_path
+                    )
+
                 result = self.processor.process_file(
                     file_path,
                     output_path,
-                    required_fields,
+                    file_required_fields,
                 )
 
-                if self._is_customer_file(file_path):
-                    customers = self.processor.csv_processor.read_file(
-                        output_path
-                    )
-
-                    saved_count = (
-                        self.customer_import_service.import_customers(
-                            customers
-                        )
-                    )
-
-                    result["customers_saved"] = saved_count
-
-                elif self._is_product_file(file_path):
-                    products = self.processor.csv_processor.read_file(
-                        output_path
-                    )
-
-                    saved_count = (
-                        self.product_import_service.import_products(
-                            products
-                        )
-                    )
-
-                    result["products_saved"] = saved_count
-
-                elif self._is_order_file(file_path):
-                    orders = self.processor.csv_processor.read_file(
-                        output_path
-                    )
-
-                    saved_count = 0
-
-                    for order in orders:
-                        self.order_import_service.import_order(order)
-                        saved_count += 1
-
-                    result["orders_saved"] = saved_count
-
-                elif self._is_invoice_file(file_path):
-                    invoices = self.processor.csv_processor.read_file(
-                        output_path
-                    )
-
-                    saved_count = 0
-
-                    for invoice in invoices:
-                        self.invoice_import_service.import_invoice(invoice)
-                        saved_count += 1
-
-                    result["invoices_saved"] = saved_count
-
-                elif self._is_payment_file(file_path):
-                    payments = self.processor.csv_processor.read_file(
-                        output_path
-                    )
-
-                    saved_count = 0
-
-                    for payment in payments:
-                        self.payment_import_service.import_payment(payment)
-                        saved_count += 1
-
-                    result["payments_saved"] = saved_count
+                self._import_processed_data(
+                    file_path,
+                    output_path,
+                    result,
+                )
 
                 self.file_manager.move_file(
                     file_path.name,
@@ -157,6 +115,84 @@ class AutomationService:
         self.logger.info("Automation workflow completed.")
 
         return results
+
+    def _get_required_fields(self, file_path):
+        """Return required fields based on the business file name."""
+        file_type = file_path.stem.lower()
+
+        return self.REQUIRED_FIELDS.get(
+            file_type,
+            [],
+        )
+
+    def _import_processed_data(self, file_path, output_path, result):
+        """Import processed records into the appropriate database table."""
+        file_type = file_path.stem.lower()
+
+        if file_type == "customers":
+            customers = self.processor.csv_processor.read_file(
+                output_path
+            )
+
+            saved_count = (
+                self.customer_import_service.import_customers(
+                    customers
+                )
+            )
+
+            result["customers_saved"] = saved_count
+
+        elif file_type == "products":
+            products = self.processor.csv_processor.read_file(
+                output_path
+            )
+
+            saved_count = (
+                self.product_import_service.import_products(
+                    products
+                )
+            )
+
+            result["products_saved"] = saved_count
+
+        elif file_type == "orders":
+            orders = self.processor.csv_processor.read_file(
+                output_path
+            )
+
+            saved_count = 0
+
+            for order in orders:
+                self.order_import_service.import_order(order)
+                saved_count += 1
+
+            result["orders_saved"] = saved_count
+
+        elif file_type == "invoices":
+            invoices = self.processor.csv_processor.read_file(
+                output_path
+            )
+
+            saved_count = 0
+
+            for invoice in invoices:
+                self.invoice_import_service.import_invoice(invoice)
+                saved_count += 1
+
+            result["invoices_saved"] = saved_count
+
+        elif file_type == "payments":
+            payments = self.processor.csv_processor.read_file(
+                output_path
+            )
+
+            saved_count = 0
+
+            for payment in payments:
+                self.payment_import_service.import_payment(payment)
+                saved_count += 1
+
+            result["payments_saved"] = saved_count
 
     def _is_customer_file(self, file_path):
         """Check whether a file contains customer records."""
