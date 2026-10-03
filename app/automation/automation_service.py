@@ -2,6 +2,8 @@
 from pathlib import Path
 
 from app.automation.file_watcher import FileWatcher
+from app.database.database_manager import DatabaseManager
+from app.reports.report_generator import ReportGenerator
 from app.services.customer_import_service import CustomerImportService
 from app.services.file_processing_service import FileProcessingService
 from app.services.invoice_import_service import InvoiceImportService
@@ -33,6 +35,9 @@ class AutomationService:
         self.order_import_service = OrderImportService()
         self.invoice_import_service = InvoiceImportService()
         self.payment_import_service = PaymentImportService()
+
+        self.database_manager = DatabaseManager()
+        self.report_generator = ReportGenerator(self.database_manager)
 
         self.file_manager = FileManager(self.input_folder)
         self.logger = AppLogger()
@@ -130,16 +135,26 @@ class AutomationService:
                     f"Original file archived: {archive_path.name}"
                 )
 
-                self.logger.info(
-                    f"Automation completed for: {file_path.name}"
-                )
-
                 results.append(result)
 
             except Exception as error:
                 self.logger.error(
                     f"Automation failed for {file_path.name}: {error}"
                 )
+
+        if results:
+            report_path = Path("reports/sales_report.txt")
+
+            self.report_generator.save_report(report_path)
+
+            self.logger.info(
+                f"Automated sales report generated: {report_path}"
+            )
+
+            for result in results:
+                result["report_generated"] = str(report_path)
+
+        self.logger.info("Automation workflow completed.")
 
         return results
 
