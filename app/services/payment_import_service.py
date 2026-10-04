@@ -1,4 +1,5 @@
 
+from app.database.database_manager import DatabaseManager
 from app.database.payment_repository import PaymentRepository
 from app.utils.logger import AppLogger
 
@@ -7,6 +8,8 @@ class PaymentImportService:
     """Imports payment records into the database."""
 
     def __init__(self, payment_repository=None):
+        if isinstance(payment_repository, DatabaseManager):
+            payment_repository = PaymentRepository(payment_repository)
         self.payment_repository = payment_repository or PaymentRepository()
         self.logger = AppLogger()
 

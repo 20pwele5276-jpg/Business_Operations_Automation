@@ -4,3 +4,5 @@ openpyxl
 schedule
 pytest
 streamlit
+groq
+python-dotenv

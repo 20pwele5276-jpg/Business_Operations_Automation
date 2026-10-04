@@ -1,35 +1,34 @@
- Business Operations Automation Platform
+# BusinessOps
 
-## Overview
+BusinessOps is a Streamlit web application for tracking small-business customers, products, orders, invoices, and payments. It includes manual entry forms, CSV/Excel/JSON imports, summary dashboards, reports, backups, and separate local workspaces for multiple businesses.
 
-This is a Python project that I am building to automate common business tasks such as handling data, organizing files, creating reports, and managing routine operations.
+## Run locally
 
-I am developing it step by step while applying the Python concepts I learn, including OOP, file handling, exception handling, automation, databases, and testing.
+Requirements: Python 3.10 or newer.
 
-## Project Goals
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m streamlit run ui/dashboard.py
+```
 
-* Automate repetitive tasks
-* Read, process, and validate business data
-* Organize files automatically
-* Store and manage business records
-* Generate useful reports
-* Handle errors properly and keep logs
-* Keep the code clean, organized, and easy to maintain
+Open the local URL printed by Streamlit. On Windows PowerShell, use the `.\` prefix when running an executable from the current folder.
 
-## Technologies
+## Run tests
 
-* Python
-* Object-Oriented Programming
-* File Handling
-* Exception Handling
-* SQLite
-* Pandas
-* Automation
-* Web Scraping
-* Testing
+```powershell
+python -m pytest -q
+```
 
-## Project Status
+## AI Copilot configuration
 
-🚧 **Currently under development**
+The AI Copilot is optional. To enable it locally, set `GROQ_API_KEY` in an ignored `.env` file or in the process environment before starting Streamlit. Never commit `.env` or Streamlit `secrets.toml` files. Without a key, the rest of the application remains available and the Copilot displays a configuration message.
 
-I am building this project in stages, starting with the Python foundation and gradually adding data processing, database management, automation, testing, and other features.
+## GitHub and hosted deployment
+
+The app entry point for Streamlit Community Cloud is `ui/dashboard.py`; install dependencies from `requirements.txt`. To deploy, push this project to a GitHub repository, then select that repository and entry point in Streamlit Community Cloud. Add `GROQ_API_KEY` through the hosting provider's secrets settings only if the Copilot is needed.
+
+**Deployment limitation:** this project is currently a local-storage MVP, not a secure multi-user hosted product. Business workspaces are stored as SQLite files on the app's filesystem, hosted filesystems may be temporary, and the app does not provide user authentication or access control. Do not put real client or confidential business data into a public deployment. Before offering it to multiple clients online, add authentication and authorization, per-client data isolation, and persistent hosted database/storage.
+
+Local workspace databases, uploaded files, generated reports, environment files, and backups are excluded from Git.

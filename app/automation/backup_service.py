@@ -19,17 +19,30 @@ class BackupService:
         self.backup_folder = Path(backup_folder)
         self.logger = AppLogger()
 
-        self.backup_folder.mkdir(parents=True, exist_ok=True)
+        self.backup_folder.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
 
     def backup_database(self):
         """Create a timestamped backup of the SQLite database."""
+
         try:
             if not self.database_path.is_file():
                 raise FileProcessingError(
                     f"Database file does not exist: {self.database_path}"
                 )
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            # Make sure the backup folder exists even if the
+            # current working directory has changed.
+            self.backup_folder.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            timestamp = datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
 
             backup_file = (
                 self.backup_folder
@@ -42,7 +55,8 @@ class BackupService:
             )
 
             self.logger.info(
-                f"Database backup created: {backup_file.name}"
+                f"Database backup created: "
+                f"{backup_file.name}"
             )
 
             return backup_file

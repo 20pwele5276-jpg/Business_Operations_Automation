@@ -4,70 +4,81 @@ import time
 import schedule
 
 from app.automation.automation_service import AutomationService
-from app.automation.backup_service import BackupService
 from app.utils.logger import AppLogger
 
 
 class AutomationScheduler:
     """Schedules recurring business automation tasks."""
 
-    def __init__(self):
-        self.automation_service = AutomationService()
-        self.backup_service = BackupService()
+    def __init__(self, automation_service=None):
+        self.automation_service = (
+            automation_service or AutomationService()
+        )
         self.logger = AppLogger()
 
     def run_business_automation(self):
-        """Process pending files and generate the latest report."""
+        """Process pending files using the automation workflow."""
+
         try:
-            results = self.automation_service.process_pending_files()
+            results = (
+                self.automation_service.process_pending_files()
+            )
 
             self.logger.info(
-                f"Scheduled business automation completed. "
+                "Scheduled business automation completed. "
                 f"Processed {len(results)} file(s)."
             )
+
+            return results
 
         except Exception as error:
             self.logger.error(
                 f"Scheduled business automation failed: {error}"
             )
 
-    def backup_database(self):
-        """Run the database backup task."""
-        try:
-            backup_file = self.backup_service.backup_database()
-
-            self.logger.info(
-                f"Scheduled backup completed: {backup_file.name}"
-            )
-
-        except Exception as error:
-            self.logger.error(
-                f"Scheduled backup failed: {error}"
-            )
+            return []
 
     def setup_schedule(self, interval_minutes=1440):
-        """Schedule recurring business automation and database backups."""
-        schedule.every(interval_minutes).minutes.do(
+        """Schedule recurring business automation."""
+
+        schedule.every(
+            interval_minutes
+        ).minutes.do(
             self.run_business_automation
         )
 
-        schedule.every(interval_minutes).minutes.do(
-            self.backup_database
+        self.logger.info(
+            "Business automation scheduled every "
+            f"{interval_minutes} minute(s)."
         )
+
+    def clear_schedule(self):
+        """Remove all scheduled tasks."""
+
+        schedule.clear()
 
         self.logger.info(
-            "Business automation and database backup "
-            f"scheduled every {interval_minutes} minute(s)."
+            "All scheduled tasks cleared."
         )
 
-    def run(self):
-        """Keep the scheduler running and execute pending tasks."""
-        self.logger.info("Automation scheduler started.")
+    def run_pending(self):
+        """Run scheduled tasks that are currently due."""
+
+        schedule.run_pending()
+
+    def run(self, check_interval=1):
+        """Keep the scheduler running continuously."""
+
+        self.logger.info(
+            "Automation scheduler started."
+        )
 
         try:
             while True:
-                schedule.run_pending()
-                time.sleep(1)
+                self.run_pending()
+                time.sleep(check_interval)
 
         except KeyboardInterrupt:
-            self.logger.info("Automation scheduler stopped.")
+            self.logger.info(
+                "Automation scheduler stopped."
+            )

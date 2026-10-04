@@ -1,4 +1,5 @@
 
+from app.database.database_manager import DatabaseManager
 from app.database.invoice_repository import InvoiceRepository
 from app.utils.logger import AppLogger
 
@@ -7,6 +8,8 @@ class InvoiceImportService:
     """Imports invoice records into the database."""
 
     def __init__(self, invoice_repository=None):
+        if isinstance(invoice_repository, DatabaseManager):
+            invoice_repository = InvoiceRepository(invoice_repository)
         self.invoice_repository = invoice_repository or InvoiceRepository()
         self.logger = AppLogger()
 

@@ -1,5 +1,6 @@
 
 from app.database.customer_repository import CustomerRepository
+from app.database.database_manager import DatabaseManager
 from app.utils.logger import AppLogger
 
 
@@ -7,6 +8,8 @@ class CustomerImportService:
     """Imports cleaned customer records into the database."""
 
     def __init__(self, customer_repository=None):
+        if isinstance(customer_repository, DatabaseManager):
+            customer_repository = CustomerRepository(customer_repository)
         self.customer_repository = customer_repository or CustomerRepository()
         self.logger = AppLogger()
 

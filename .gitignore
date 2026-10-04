@@ -1,45 +1,37 @@
-```gitignore
-# Virtual environment
+# Python environments and caches
 venv/
-
-# Python cache files
+.venv/
 __pycache__/
 *.py[cod]
-
-# Environment variables and secrets
-.env
-
-# IDE settings
-.vscode/
-
-# Test and coverage files
 .pytest_cache/
 .coverage
 htmlcov/
 
-# Generated files
-*.log
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
 
-# OS files
-.DS_Store
-Thumbs.db
+# Local business records and databases
+data/workspaces/
+data/current_workspace.json
+data/**/*.db
+data/**/*.db-*
+data/**/*.sqlite
+data/**/*.sqlite3
+tmp_customers.csv
 
-# Local database
-data/business.db
-
-# Generated reports
+# Generated data and reports
 reports/
-
-# Input files
 data/input/*
-
-# Processed files
 data/processed/*
-
-# Archived files
 data/archive/*
 !data/archive/.gitkeep
-
-# Database backups
 data/backup/*.db
-```
+
+# Logs, IDE and OS files
+*.log
+.vscode/
+.DS_Store
+Thumbs.db

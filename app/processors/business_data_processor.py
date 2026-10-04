@@ -1,3 +1,4 @@
+
 from app.exceptions.app_exceptions import ValidationError
 from app.processors.data_cleaner import DataCleaner
 from app.processors.data_validator import DataValidator
@@ -14,6 +15,7 @@ class BusinessDataProcessor:
 
     def process_rows(self, rows, required_fields):
         """Clean valid rows and report rows with validation errors."""
+
         valid_rows = []
         invalid_rows = []
 
@@ -31,10 +33,21 @@ class BusinessDataProcessor:
                         f"Missing required fields: {', '.join(missing_fields)}"
                     )
 
+                validation_errors = self.validator.validate_row(
+                    cleaned_row
+                )
+
+                if validation_errors:
+                    raise ValidationError(
+                        "; ".join(validation_errors)
+                    )
+
                 valid_rows.append(cleaned_row)
 
             except ValidationError as error:
-                self.logger.warning(f"Invalid row skipped: {error}")
+                self.logger.warning(
+                    f"Invalid row skipped: {error}"
+                )
 
                 invalid_rows.append(
                     {
@@ -44,7 +57,9 @@ class BusinessDataProcessor:
                 )
 
             except Exception as error:
-                self.logger.error(f"Unexpected processing error: {error}")
+                self.logger.error(
+                    f"Unexpected processing error: {error}"
+                )
 
                 invalid_rows.append(
                     {

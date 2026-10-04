@@ -1,4 +1,5 @@
 
+from app.database.database_manager import DatabaseManager
 from app.database.order_repository import OrderRepository
 from app.utils.logger import AppLogger
 
@@ -7,6 +8,8 @@ class OrderImportService:
     """Imports order records into the database."""
 
     def __init__(self, order_repository=None):
+        if isinstance(order_repository, DatabaseManager):
+            order_repository = OrderRepository(order_repository)
         self.order_repository = order_repository or OrderRepository()
         self.logger = AppLogger()
 
